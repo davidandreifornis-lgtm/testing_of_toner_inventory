@@ -126,3 +126,24 @@ function auth_user_id(): int {
     auth_start();
     return (int)($_SESSION['toner_user_id'] ?? 0);
 }
+function auth_role(): string {
+    auth_start();
+    return (string)($_SESSION['toner_role'] ?? 'admin');
+}
+
+function auth_full_name(): string {
+    auth_start();
+    return (string)($_SESSION['toner_full_name'] ?? auth_user());
+}
+
+function auth_is_admin(): bool {
+    return strtolower(auth_role()) === 'admin';
+}
+
+/** Require admin role for sensitive APIs (user management). Config-only users are treated as admin. */
+function auth_require_admin_api(): void {
+    auth_require_api();
+    if (!auth_is_admin()) {
+        fail('Admin role required.', 403);
+    }
+}

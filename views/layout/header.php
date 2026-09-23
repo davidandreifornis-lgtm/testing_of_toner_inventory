@@ -1,9 +1,9 @@
-<header id="app-header" class="sticky top-0 z-30 h-14 flex items-center justify-between px-4 sm:px-6 shrink-0">
+<header id="app-header" class="sticky top-0 z-30 h-11 flex items-center justify-between px-3 sm:px-4 shrink-0">
   <div class="flex items-center gap-3">
     <button id="btn-sidebar-toggle" type="button" class="lg:hidden p-2 rounded-lg hover:bg-slate-100 text-slate-600" aria-label="Toggle menu">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
     </button>
-    <h1 id="page-title" class="text-base font-semibold text-slate-900">Dashboard</h1>
+    <h1 id="page-title" class="text-sm font-semibold text-slate-900">Dashboard</h1>
   </div>
   <div class="flex items-center gap-2">
     <button id="btn-notifications" type="button" class="relative p-2 rounded-lg hover:bg-slate-100 text-slate-600" aria-label="Notifications">
@@ -11,7 +11,7 @@
       <span id="notif-badge" class="hidden absolute top-1 right-1 w-4 h-4 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">0</span>
     </button>
     <div class="hidden sm:flex items-center gap-2 pl-2 border-l border-slate-200">
-      <div class="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">A</div>
+      <div class="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">A</div>
       <span class="text-sm font-medium text-slate-700"><?php echo htmlspecialchars(auth_user()); ?></span>
     </div>
   </div>

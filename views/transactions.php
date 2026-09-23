@@ -1,4 +1,4 @@
-<section id="view-transactions" class="page-view space-y-4">
+<section id="view-transactions" class="page-view space-y-2">
   <div class="flex flex-wrap items-center justify-between gap-3">
     <div class="flex flex-wrap gap-1 border-b border-slate-200">
       <button type="button" data-txn-tab="RECEIVED" class="txn-tab px-3 py-2 text-sm font-medium border-b-2 border-slate-900 text-slate-900">Deliveries</button>

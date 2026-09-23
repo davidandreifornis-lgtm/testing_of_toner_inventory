@@ -20,7 +20,8 @@ Modular rebuild of the printer toner inventory application. Same business behavi
 | **Transaction History** | Tabs, date filters, search, **Export CSV** |
 | **Dashboard** | SKUs, stock, low/out, period deliveries/releases, charts, mail/system logs |
 | **Masters** | Manage suppliers and department/location/printer mappings |
-| **Low-stock email** | Optional SMTP via settings page / `config/mail.php` |
+| **Low-stock email** | Optional SMTP via Settings page / `config/mail.php` |
+| **User management** | Create/edit/deactivate users; roles admin & user; change own password |
 
 **Rules:** Reference numbers are unique (no double-posting). Issuance is always 1 unit. Stock cannot go negative. Flagging defective does not increase usable stock; receiving a replacement does.
 
@@ -66,6 +67,7 @@ toner-inventory/
    - `sql/migration_issuance_fields.sql`
    - `sql/migration_email_settings.sql`
    - `sql/migration_system_logs.sql`
+   - `sql/migration_users.sql`
 4. Ensure PHP can reach SQL Server (`pdo_sqlsrv` + ODBC driver).
 5. Open `https://your-host/toner-inventory/login.php`.
 
@@ -87,6 +89,7 @@ The app uses tables such as `dbo.toner_inventory` and `dbo.toner_transactions`. 
 | GET/POST | `/api/settings.php` | Email SMTP settings |
 | GET | `/api/logs.php` | System activity logs |
 | GET | `/api/mail_log.php` | Outgoing mail log |
+| GET/POST/PUT/DELETE | `/api/users.php` | User management (`?self=1` for profile) |
 
 Responses use `{ "ok": true, ... }` or `{ "ok": false, "error": "..." }`.
 
@@ -111,7 +114,7 @@ Responses use `{ "ok": true, ... }` or `{ "ok": false, "error": "..." }`.
 
 ## Email configuration
 
-In the app: **Email Settings** (sidebar).
+In the app: **Settings** (sidebar).
 
 | Setting | Purpose |
 |---------|---------|

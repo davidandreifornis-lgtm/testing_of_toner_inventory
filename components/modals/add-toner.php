@@ -9,7 +9,7 @@
     <form id="form-add-toner" class="p-5 space-y-3">
       <div>
         <label class="form-label" for="add-code">Item code *</label>
-        <input id="add-code" name="itemCode" type="text" required class="form-input font-mono uppercase" placeholder="e.g. TN-227BK">
+        <input id="add-code" name="itemCode" type="text" required class="form-input font-mono uppercase" placeholder="Item code">
       </div>
       <div>
         <label class="form-label" for="add-desc">Description *</label>

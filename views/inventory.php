@@ -1,6 +1,6 @@
-<section id="view-inventory" class="page-view space-y-4">
-  <div class="flex flex-wrap items-center justify-between gap-3">
-    <p class="text-sm text-slate-500">Master list of toners. Click a row for stock card.</p>
+<section id="view-inventory" class="page-view space-y-2">
+  <div class="flex flex-wrap items-center justify-between gap-2">
+    <p class="text-xs text-slate-500">Master list of toners. Click a row for stock card.</p>
     <div class="flex flex-wrap items-center gap-2">
       <input id="inv-search" type="search" placeholder="Search code or description…" class="form-input w-48 sm:w-56">
       <select id="inv-status-filter" class="form-input w-auto">
@@ -32,7 +32,7 @@
           </tr>
         </thead>
         <tbody id="inventory-tbody">
-          <tr><td colspan="8" class="text-center text-slate-400 py-8">Loading…</td></tr>
+          <tr><td colspan="8" class="text-center text-slate-400 py-4">Loading…</td></tr>
         </tbody>
       </table>
     </div>

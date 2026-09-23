@@ -1,23 +1,26 @@
 /**
  * Stock issuance — always 1 unit, date = today.
- * Supports location printer + actual yield.
+ * Departments / locations / printers come only from dbo.toner_locations (API).
  */
 const Release = {
   locationsByDept: {},
   locationMeta: {}, // dept|loc -> { printerName }
 
   async loadLocations() {
+    const deptSel = document.getElementById('rel-dept');
+    const locSel = document.getElementById('rel-location');
+    this.locationsByDept = {};
+    this.locationMeta = {};
+
     try {
       const res = await API.locations();
       const locs = res.locations || res.data?.locations || [];
-      this.locationsByDept = {};
-      this.locationMeta = {};
 
-      if (Array.isArray(locs) && locs.length) {
+      if (Array.isArray(locs)) {
         locs.forEach((l) => {
-          const dept = l.department || l.dept || 'General';
-          const name = l.location || l.name || '';
-          if (!name) return;
+          const dept = String(l.department || l.dept || '').trim();
+          const name = String(l.location || l.name || '').trim();
+          if (!dept || !name) return;
           if (!this.locationsByDept[dept]) this.locationsByDept[dept] = [];
           if (!this.locationsByDept[dept].includes(name)) {
             this.locationsByDept[dept].push(name);
@@ -27,42 +30,25 @@ const Release = {
           };
         });
       }
+    } catch (err) {
+      console.warn('Could not load locations from database:', err.message || err);
+    }
 
-      if (!Object.keys(this.locationsByDept).length) {
-        this.locationsByDept = {
-          'Human Resources': ['HR Office', 'HR Meeting Room'],
-          Finance: ['Finance Office', 'Accounting'],
-          IT: ['Server Room', 'IT Helpdesk'],
-          Operations: ['Ops Floor', 'Warehouse'],
-          Admin: ['Admin Office'],
-        };
-      }
-
-      const deptSel = document.getElementById('rel-dept');
-      if (deptSel) {
+    if (deptSel) {
+      const keys = Object.keys(this.locationsByDept).sort();
+      if (!keys.length) {
+        deptSel.innerHTML =
+          '<option value="">No departments in database — add under Masters</option>';
+      } else {
         deptSel.innerHTML =
           '<option value="">Select department…</option>' +
-          Object.keys(this.locationsByDept)
-            .sort()
+          keys
             .map((d) => `<option value="${Utils.escapeHtml(d)}">${Utils.escapeHtml(d)}</option>`)
             .join('');
       }
-    } catch {
-      this.locationsByDept = {
-        'Human Resources': ['HR Office'],
-        Finance: ['Finance Office'],
-        IT: ['IT Helpdesk'],
-        Operations: ['Ops Floor'],
-        Admin: ['Admin Office'],
-      };
-      const deptSel = document.getElementById('rel-dept');
-      if (deptSel) {
-        deptSel.innerHTML =
-          '<option value="">Select department…</option>' +
-          Object.keys(this.locationsByDept)
-            .map((d) => `<option value="${Utils.escapeHtml(d)}">${Utils.escapeHtml(d)}</option>`)
-            .join('');
-      }
+    }
+    if (locSel) {
+      locSel.innerHTML = '<option value="">Select location…</option>';
     }
   },
 
@@ -71,9 +57,15 @@ const Release = {
     const locSel = document.getElementById('rel-location');
     if (!locSel) return;
     const locs = this.locationsByDept[dept] || [];
-    locSel.innerHTML =
-      '<option value="">Select location…</option>' +
-      locs.map((l) => `<option value="${Utils.escapeHtml(l)}">${Utils.escapeHtml(l)}</option>`).join('');
+    if (!dept) {
+      locSel.innerHTML = '<option value="">Select location…</option>';
+    } else if (!locs.length) {
+      locSel.innerHTML = '<option value="">No locations for this department</option>';
+    } else {
+      locSel.innerHTML =
+        '<option value="">Select location…</option>' +
+        locs.map((l) => `<option value="${Utils.escapeHtml(l)}">${Utils.escapeHtml(l)}</option>`).join('');
+    }
     const printer = document.getElementById('rel-printer');
     if (printer) printer.value = '';
   },
@@ -107,7 +99,11 @@ const Release = {
     const st = Utils.stockStatus(qty, item.reorderLevel);
     hint.innerHTML =
       `Current stock: <strong>${qty}</strong> ` +
-      (st === 'out' ? '<span class="text-rose-600">(out of stock)</span>' : st === 'low' ? '<span class="text-amber-600">(low)</span>' : '');
+      (st === 'out'
+        ? '<span class="text-rose-600">(out of stock)</span>'
+        : st === 'low'
+          ? '<span class="text-amber-600">(low)</span>'
+          : '');
   },
 
   showMsg(text, ok) {
@@ -137,7 +133,7 @@ const Release = {
       return;
     }
     if (!department) {
-      this.showMsg('Department is required.', false);
+      this.showMsg('Department is required. Add departments under Masters if the list is empty.', false);
       return;
     }
     if (!location) {
@@ -185,6 +181,7 @@ const Release = {
     if (dateEl) dateEl.value = Utils.today();
     const msg = document.getElementById('rel-msg');
     if (msg) msg.classList.add('hidden');
+    this.loadLocations();
     Inventory.populateSelects?.();
     this.onItemChange();
     if (window.Modals) {

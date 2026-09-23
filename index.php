@@ -15,7 +15,7 @@ header('Content-Type: text/html; charset=UTF-8');
 header('Cache-Control: no-store, no-cache, must-revalidate');
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -54,14 +54,14 @@ header('Cache-Control: no-store, no-cache, must-revalidate');
       display: none;
       align-items: center;
       justify-content: center;
-      padding: 1rem;
+      padding: 0.5rem;
     }
     .modal-backdrop.open { display: flex !important; }
     .modal-panel {
       background: #fff;
-      border-radius: 0.875rem;
+      border-radius: 0.5rem;
       box-shadow: 0 20px 50px rgba(15, 23, 42, 0.2);
-      max-height: 90vh;
+      max-height: 92vh;
       overflow: auto;
       width: 100%;
       position: relative;
@@ -70,12 +70,12 @@ header('Cache-Control: no-store, no-cache, must-revalidate');
   </style>
 
 </head>
-<body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen">
-  <div id="app" class="flex min-h-screen">
+<body class="bg-slate-50 text-slate-900 font-sans antialiased h-full overflow-hidden">
+  <div id="app" class="flex h-full min-h-0">
     <?php require __DIR__ . '/views/layout/sidebar.php'; ?>
-    <div class="flex-1 flex flex-col min-w-0 lg:pl-64">
+    <div class="flex-1 flex flex-col min-w-0 min-h-0 lg:pl-64">
       <?php require __DIR__ . '/views/layout/header.php'; ?>
-      <main id="main-content" class="flex-1 p-4 sm:p-6 space-y-6 overflow-x-hidden">
+      <main id="main-content" class="flex-1 min-h-0 space-y-2 overflow-x-hidden overflow-y-auto">
         <?php require __DIR__ . '/views/dashboard.php'; ?>
         <?php require __DIR__ . '/views/inventory.php'; ?>
         <?php require __DIR__ . '/views/transactions.php'; ?>
@@ -93,6 +93,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate');
   <?php require __DIR__ . '/components/modals/confirm.php'; ?>
   <?php require __DIR__ . '/components/modals/mail-log.php'; ?>
   <?php require __DIR__ . '/components/modals/system-logs.php'; ?>
+  <?php require __DIR__ . '/components/modals/kpi-detail.php'; ?>
   <?php require __DIR__ . '/views/layout/notifications.php'; ?>
 
   <div id="toast-container" class="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none"></div>

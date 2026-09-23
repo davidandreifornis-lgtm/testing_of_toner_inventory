@@ -20,7 +20,7 @@
       <div>
         <label class="form-label" for="del-ref">Reference / MRR number</label>
         <div class="flex gap-2">
-          <input id="del-ref" type="text" class="form-input font-mono uppercase flex-1" placeholder="e.g. MG009105 or DEL-2026-00125" autocomplete="off">
+          <input id="del-ref" type="text" class="form-input font-mono uppercase flex-1" placeholder="Reference / MRR number" autocomplete="off">
           <button id="btn-search-mrr" type="button" class="btn btn-secondary whitespace-nowrap">Search MRR</button>
         </div>
       </div>

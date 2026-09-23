@@ -4,12 +4,12 @@
  *
  * POST JSON:
  *  A) Preview (no write):
- *     { "action": "preview", "mrr": "MG009105" }
+ *     { "action": "preview", "mrr": "REFERENCE" }
  *     → looks up ERP lines and returns them without posting
  *  B) MRR mode (post from ERP):
- *     { "mrr": "MG009105", "supplier": optional }
+ *     { "mrr": "REFERENCE", "supplier": optional }
  *  C) Lines mode:
- *     { "referenceNumber": "MG009105", "lines": [ { itemCode, quantity, date, description }, ... ], "supplier": optional }
+ *     { "referenceNumber": "REFERENCE", "lines": [ { itemCode, quantity, date, description }, ... ], "supplier": optional }
  *  D) Legacy single:
  *     { referenceNumber, inkCode, quantity, date, supplier }
  */

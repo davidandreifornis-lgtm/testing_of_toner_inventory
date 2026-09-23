@@ -8,7 +8,7 @@ const App = {
     inventory: 'Toner Inventory',
     transactions: 'Transaction History',
     masters: 'Masters',
-    settings: 'Email Settings',
+    settings: 'Settings',
   },
 
   showView(name) {

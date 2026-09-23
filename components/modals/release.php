@@ -12,7 +12,7 @@
     <div class="p-5 space-y-4">
       <div>
         <label class="form-label" for="rel-ref">Issuance reference number</label>
-        <input id="rel-ref" type="text" class="form-input font-mono uppercase" placeholder="e.g. REL-2026-00451" autocomplete="off">
+        <input id="rel-ref" type="text" class="form-input font-mono uppercase" placeholder="Issuance reference" autocomplete="off">
       </div>
       <div>
         <label class="form-label" for="rel-item">Toner / Item code</label>
