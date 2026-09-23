@@ -32,13 +32,14 @@ toner-inventory/
 ├── config/                # database, auth, bootstrap, mailer
 ├── api/                   # REST-style PHP endpoints (PDO)
 ├── views/                 # Page sections + layout
-│   ├── layout/
-│   ├── dashboard/
-│   ├── inventory/
-│   ├── delivery/
-│   ├── release/
-│   ├── defective/
-│   └── transactions/
+│   ├── layout/            # header, sidebar, notifications
+│   ├── dashboard.php
+│   ├── inventory.php
+│   ├── delivery.php
+│   ├── release.php
+│   ├── defective.php
+│   ├── transactions.php
+│   └── settings.php
 ├── components/modals/
 ├── assets/
 │   ├── css/app.css
@@ -80,6 +81,22 @@ Responses use `{ "ok": true, ... }` or `{ "ok": false, "error": "..." }`.
 - **Backend:** Existing modular PHP APIs retained; compatible with SQL Server schema.
 - **Auth:** PHP sessions (`auth_lib.php`); pages and APIs require admin login.
 - **No localStorage demo mode** — empty states when the database has no rows.
+
+
+## Email configuration
+
+In the app: **Email Settings** (sidebar).
+
+| Setting | Purpose |
+|---------|---------|
+| Alert recipient | Address that receives low-stock alerts |
+| SMTP host / port / encryption | e.g. `smtp.gmail.com`, 465 + SSL or 587 + TLS |
+| SMTP username | Usually your mailbox address (also used as From) |
+| SMTP password | Gmail **App Password** recommended |
+| Cooldown hours | Suppress repeat alerts for the same item |
+
+Settings are saved to `dbo.toner_email_settings` when the database is available. Emergency defaults live in `config/mail.php`.  
+Test: **Run low-stock check** on the settings page, or open `/api/check_low_stock.php?force=1` while logged in.
 
 ## Security
 

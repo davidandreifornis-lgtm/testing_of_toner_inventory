@@ -10,6 +10,7 @@ const App = {
     release: 'Stock Issuance',
     defective: 'Return Defective',
     transactions: 'Transaction History',
+    settings: 'Email Settings',
   },
 
   showView(name) {
@@ -31,6 +32,7 @@ const App = {
     if (name === 'transactions') Transactions.load();
     if (name === 'dashboard') Dashboard.load();
     if (name === 'inventory') Inventory.load();
+    if (name === 'settings') Settings.load();
   },
 
   initNav() {
@@ -65,6 +67,7 @@ const App = {
     Release.init();
     Defective.init();
     Transactions.init();
+    Settings.init();
     this.initNav();
 
     // Initial data load from database only

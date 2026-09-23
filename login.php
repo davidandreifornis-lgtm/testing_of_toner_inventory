@@ -81,6 +81,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </form>
     </div>
     <p class="text-center text-xs text-slate-400 mt-4">Authorized administrators only</p>
+    <div class="mt-3 rounded-xl border border-slate-200 bg-white/80 px-4 py-3 text-center text-xs text-slate-600">
+      <div class="font-semibold text-slate-700 mb-1">Demo login (works offline)</div>
+      <div>Username: <code class="font-mono bg-slate-100 px-1.5 py-0.5 rounded">admin</code></div>
+      <div class="mt-0.5">Password: <code class="font-mono bg-slate-100 px-1.5 py-0.5 rounded">admin123</code></div>
+      <p class="mt-2 text-[11px] text-slate-400">Uses config credentials when the database is unavailable. Inventory data still requires a live DB connection.</p>
+    </div>
   </div>
 </body>
 </html>

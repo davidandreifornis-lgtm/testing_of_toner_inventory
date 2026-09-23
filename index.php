@@ -52,12 +52,13 @@ header('Cache-Control: no-store, no-cache, must-revalidate');
     <div class="flex-1 flex flex-col min-w-0 lg:pl-64">
       <?php require __DIR__ . '/views/layout/header.php'; ?>
       <main id="main-content" class="flex-1 p-4 sm:p-6 space-y-6 overflow-x-hidden">
-        <?php require __DIR__ . '/views/dashboard/index.php'; ?>
-        <?php require __DIR__ . '/views/inventory/index.php'; ?>
-        <?php require __DIR__ . '/views/delivery/index.php'; ?>
-        <?php require __DIR__ . '/views/release/index.php'; ?>
-        <?php require __DIR__ . '/views/defective/index.php'; ?>
-        <?php require __DIR__ . '/views/transactions/index.php'; ?>
+        <?php require __DIR__ . '/views/dashboard.php'; ?>
+        <?php require __DIR__ . '/views/inventory.php'; ?>
+        <?php require __DIR__ . '/views/delivery.php'; ?>
+        <?php require __DIR__ . '/views/release.php'; ?>
+        <?php require __DIR__ . '/views/defective.php'; ?>
+        <?php require __DIR__ . '/views/transactions.php'; ?>
+        <?php require __DIR__ . '/views/settings.php'; ?>
       </main>
     </div>
   </div>
@@ -80,6 +81,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate');
   <script src="<?php echo htmlspecialchars($assetBase); ?>/assets/js/release.js"></script>
   <script src="<?php echo htmlspecialchars($assetBase); ?>/assets/js/defective.js"></script>
   <script src="<?php echo htmlspecialchars($assetBase); ?>/assets/js/transactions.js"></script>
+  <script src="<?php echo htmlspecialchars($assetBase); ?>/assets/js/settings.js"></script>
   <script src="<?php echo htmlspecialchars($assetBase); ?>/assets/js/app.js"></script>
 </body>
 </html>
