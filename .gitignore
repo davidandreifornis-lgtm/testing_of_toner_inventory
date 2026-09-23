@@ -1,0 +1,20 @@
+# Secrets — never commit real credentials
+config/database.php
+config/mail.php
+config/auth.php
+
+# Runtime
+storage/mail.log
+storage/low_stock_alerts.json
+storage/*.log
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Dependencies (if any)
+node_modules/
+vendor/
