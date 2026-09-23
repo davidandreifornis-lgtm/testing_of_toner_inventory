@@ -1,14 +1,16 @@
 <?php
 /**
- * Record delivery from MRR (preferred) or manual single line.
+ * Record delivery from MRR (preferred), multi-line, or manual single line.
  *
  * POST JSON:
- *  A) MRR mode:
+ *  A) Preview (no write):
+ *     { "action": "preview", "mrr": "MG009105" }
+ *     → looks up ERP lines and returns them without posting
+ *  B) MRR mode (post from ERP):
  *     { "mrr": "MG009105", "supplier": optional }
- *     → looks up ERP lines and posts all
- *  B) Lines mode:
+ *  C) Lines mode:
  *     { "referenceNumber": "MG009105", "lines": [ { itemCode, quantity, date, description }, ... ], "supplier": optional }
- *  C) Legacy single:
+ *  D) Legacy single:
  *     { referenceNumber, inkCode, quantity, date, supplier }
  */
 require_once __DIR__ . '/../config/bootstrap.php';
@@ -95,7 +97,6 @@ function post_delivery_line(PDO $pdo, string $ref, array $line, string $supplier
     $row = $inv->fetch(PDO::FETCH_ASSOC);
 
     if (!$row) {
-        // Auto-register from MRR item
         $insInv = $pdo->prepare(
             'INSERT INTO dbo.toner_inventory (item_code, description, printer_model, quantity, reorder_level, supplier, created_at, updated_at)
              VALUES (?, ?, ?, 0, 3, ?, SYSUTCDATETIME(), SYSUTCDATETIME())'
@@ -110,7 +111,6 @@ function post_delivery_line(PDO $pdo, string $ref, array $line, string $supplier
     $row = array_change_key_case($row, CASE_LOWER);
     $newQty = (int)$row['quantity'] + $qty;
 
-    // Build dynamic UPDATE for optional columns
     $sets = ['quantity = ?', 'updated_at = SYSUTCDATETIME()'];
     $params = [$newQty];
     if (inv_has_column($pdo, 'last_mrr_no')) {
@@ -159,19 +159,43 @@ function post_delivery_line(PDO $pdo, string $ref, array $line, string $supplier
 }
 
 try {
-    // Accept MRR from several possible JSON keys
+    $action = strtolower(trim((string)($in['action'] ?? 'record')));
     $mrr = strtoupper(trim((string)(
         $in['mrr'] ?? $in['mrrNo'] ?? $in['MRR'] ?? $in['referenceNumber'] ?? $in['ref'] ?? ''
     )));
     $ref = normalize_ref($mrr);
     $supplier = trim((string)($in['supplier'] ?? ''));
+    $inkCodeExplicit = strtoupper(trim((string)($in['inkCode'] ?? $in['itemCode'] ?? '')));
+    $hasLines = !empty($in['lines']) && is_array($in['lines']);
+
+    if ($action === 'preview' || $action === 'search' || $action === 'lookup') {
+        if ($ref === '') fail('MRR / reference number is required to search.');
+        try {
+            $lines = fetch_mrr_lines($pdo, $ref);
+        } catch (Throwable $e) {
+            fail('ERP lookup failed: ' . $e->getMessage() . ' Use Manual mode if the linked server is unavailable.', 502);
+        }
+        if (!$lines) {
+            fail("MRR {$ref} not found in ERP (or no valid lines).", 404);
+        }
+        $dup = $pdo->prepare('SELECT id FROM dbo.toner_transactions WHERE reference_number = ?');
+        $dup->execute([$ref]);
+        $already = (bool)$dup->fetch();
+        ok([
+            'message' => 'MRR lines found',
+            'referenceNumber' => $ref,
+            'mrr' => $ref,
+            'lineCount' => count($lines),
+            'lines' => $lines,
+            'alreadyRecorded' => $already,
+        ]);
+    }
 
     $lines = [];
 
-    // 1) Client already searched ERP and sent lines (preferred — no second ERP call)
-    if (!empty($in['lines']) && is_array($in['lines'])) {
+    if ($hasLines) {
         if ($ref === '') {
-            fail('MRR number is required. Search MRR first, then confirm.');
+            fail('Reference / MRR number is required.');
         }
         foreach ($in['lines'] as $L) {
             $code = strtoupper(trim((string)($L['itemCode'] ?? $L['inkCode'] ?? '')));
@@ -188,30 +212,32 @@ try {
             fail('No valid lines in the delivery payload.');
         }
     }
-    // 2) Only MRR provided — look up ERP again
-    elseif ($ref !== '') {
-        $lines = fetch_mrr_lines($pdo, $ref);
-        if (!$lines) {
-            fail("MRR {$ref} not found in ERP (or no valid lines).", 404);
-        }
-    }
-    // 3) Legacy single-line manual
-    else {
-        $inkCode = strtoupper(trim((string)($in['inkCode'] ?? $in['itemCode'] ?? '')));
+    elseif ($inkCodeExplicit !== '') {
+        if ($ref === '') fail('Reference / MRR number is required.');
         $qty = (int)($in['quantity'] ?? 0);
         $date = trim((string)($in['date'] ?? date('Y-m-d')));
-        if ($ref === '') fail('MRR number is required. Enter MRR, click Search, then Confirm.');
-        if ($inkCode === '') fail('Toner / item code is required.');
         if ($qty < 1) fail('Quantity must be at least 1.');
         $lines[] = [
-            'itemCode' => $inkCode,
+            'itemCode' => $inkCodeExplicit,
             'quantity' => $qty,
             'date' => $date ?: date('Y-m-d'),
             'description' => trim((string)($in['description'] ?? '')),
         ];
     }
+    elseif ($ref !== '') {
+        try {
+            $lines = fetch_mrr_lines($pdo, $ref);
+        } catch (Throwable $e) {
+            fail('ERP lookup failed: ' . $e->getMessage() . ' Use Manual mode or send lines.', 502);
+        }
+        if (!$lines) {
+            fail("MRR {$ref} not found in ERP (or no valid lines).", 404);
+        }
+    } else {
+        fail('Provide a reference number with either MRR search, lines, or a toner code + quantity.');
+    }
 
-    if ($ref === '') fail('MRR number is required. Enter MRR, click Search, then Confirm.');
+    if ($ref === '') fail('Reference / MRR number is required.');
 
     $pdo->beginTransaction();
 
@@ -233,14 +259,14 @@ try {
     $pdo->commit();
 
     activity_log('receive_delivery', 'Received delivery', [
-        'reference' => isset($ref) ? $ref : (isset($mrr) ? $mrr : ''),
-        'details' => 'Posted stock from delivery/MRR',
+        'reference' => $ref,
+        'details' => 'Posted ' . count($posted) . ' line(s) from delivery/MRR',
     ]);
 
     try { notify_low_stock($pdo); } catch (Throwable $e) { /* ignore */ }
 
     ok([
-        'message' => 'Delivery recorded from MRR',
+        'message' => 'Delivery recorded' . (count($posted) > 1 ? ' (' . count($posted) . ' lines)' : ''),
         'referenceNumber' => $ref,
         'mrr' => $ref,
         'lineCount' => count($posted),

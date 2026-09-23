@@ -92,6 +92,9 @@ const API = {
   delivery(payload) {
     return this.post('/delivery.php', payload);
   },
+  previewDelivery(mrr) {
+    return this.post('/delivery.php', { action: 'preview', mrr, referenceNumber: mrr });
+  },
   release(payload) {
     return this.post('/release.php', payload);
   },
@@ -100,6 +103,9 @@ const API = {
   },
   locations() {
     return this.get('/locations.php');
+  },
+  suppliers() {
+    return this.get('/suppliers.php');
   },
   health() {
     return this.get('/health.php');

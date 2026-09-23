@@ -7,6 +7,7 @@ const App = {
     dashboard: 'Dashboard',
     inventory: 'Toner Inventory',
     transactions: 'Transaction History',
+    masters: 'Masters',
     settings: 'Email Settings',
   },
 
@@ -30,6 +31,7 @@ const App = {
     if (name === 'dashboard') Dashboard.load();
     if (name === 'inventory') Inventory.load();
     if (name === 'settings') Settings.load();
+    if (name === 'masters') Masters.load();
   },
 
   initNav() {
@@ -65,6 +67,8 @@ const App = {
     Defective.init();
     Transactions.init();
     Settings.init();
+    Logs.init();
+    Masters.init();
     this.initNav();
 
     // Initial data load from database only

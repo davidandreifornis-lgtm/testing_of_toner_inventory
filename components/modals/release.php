@@ -37,6 +37,16 @@
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
+          <label class="form-label" for="rel-printer">Location printer</label>
+          <input id="rel-printer" type="text" class="form-input" placeholder="Optional — auto-fills from location">
+        </div>
+        <div>
+          <label class="form-label" for="rel-yield">Actual yield</label>
+          <input id="rel-yield" type="number" min="0" step="1" class="form-input" placeholder="Optional">
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
           <label class="form-label" for="rel-date">Date</label>
           <input id="rel-date" type="date" class="form-input bg-slate-50" readonly>
         </div>

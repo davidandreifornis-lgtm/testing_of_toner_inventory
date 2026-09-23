@@ -79,6 +79,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate');
         <?php require __DIR__ . '/views/dashboard.php'; ?>
         <?php require __DIR__ . '/views/inventory.php'; ?>
         <?php require __DIR__ . '/views/transactions.php'; ?>
+        <?php require __DIR__ . '/views/masters.php'; ?>
         <?php require __DIR__ . '/views/settings.php'; ?>
       </main>
     </div>
@@ -90,6 +91,8 @@ header('Cache-Control: no-store, no-cache, must-revalidate');
   <?php require __DIR__ . '/components/modals/stock-card.php'; ?>
   <?php require __DIR__ . '/components/modals/add-toner.php'; ?>
   <?php require __DIR__ . '/components/modals/confirm.php'; ?>
+  <?php require __DIR__ . '/components/modals/mail-log.php'; ?>
+  <?php require __DIR__ . '/components/modals/system-logs.php'; ?>
   <?php require __DIR__ . '/views/layout/notifications.php'; ?>
 
   <div id="toast-container" class="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none"></div>
@@ -105,7 +108,9 @@ header('Cache-Control: no-store, no-cache, must-revalidate');
   <script src="<?php echo htmlspecialchars($assetBase); ?>/assets/js/release.js"></script>
   <script src="<?php echo htmlspecialchars($assetBase); ?>/assets/js/defective.js"></script>
   <script src="<?php echo htmlspecialchars($assetBase); ?>/assets/js/transactions.js"></script>
+  <script src="<?php echo htmlspecialchars($assetBase); ?>/assets/js/masters.js"></script>
   <script src="<?php echo htmlspecialchars($assetBase); ?>/assets/js/settings.js"></script>
+  <script src="<?php echo htmlspecialchars($assetBase); ?>/assets/js/logs.js"></script>
   <script src="<?php echo htmlspecialchars($assetBase); ?>/assets/js/app.js"></script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 <section id="view-dashboard" class="page-view active space-y-4">
   <div class="flex flex-wrap items-center justify-between gap-3">
     <p class="text-sm text-slate-500">Overview of toner stock levels and movements.</p>
-    <div class="flex items-center gap-2">
+    <div class="flex flex-wrap items-center gap-2">
       <select id="dash-period" class="form-input w-auto text-sm py-1.5">
         <option value="today">Today</option>
         <option value="week">This week</option>
@@ -9,6 +9,8 @@
         <option value="all">All time</option>
       </select>
       <button id="btn-refresh-dashboard" type="button" class="btn btn-secondary btn-sm">Refresh</button>
+      <button id="btn-open-mail-log" type="button" class="btn btn-secondary btn-sm">Mail log</button>
+      <button id="btn-open-system-logs" type="button" class="btn btn-secondary btn-sm">System logs</button>
     </div>
   </div>
 

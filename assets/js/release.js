@@ -1,31 +1,33 @@
 /**
  * Stock issuance — always 1 unit, date = today.
+ * Supports location printer + actual yield.
  */
 const Release = {
   locationsByDept: {},
+  locationMeta: {}, // dept|loc -> { printerName }
 
   async loadLocations() {
     try {
       const res = await API.locations();
-      // Expect either { departments: [...] } or { locations: [...] }
-      const depts = res.departments || res.data?.departments || [];
       const locs = res.locations || res.data?.locations || [];
-
       this.locationsByDept = {};
-      if (Array.isArray(depts) && depts.length) {
-        depts.forEach((d) => {
-          const name = d.name || d.department || d;
-          this.locationsByDept[name] = (d.locations || []).map((l) => l.name || l.location || l);
-        });
-      } else if (Array.isArray(locs)) {
+      this.locationMeta = {};
+
+      if (Array.isArray(locs) && locs.length) {
         locs.forEach((l) => {
           const dept = l.department || l.dept || 'General';
+          const name = l.location || l.name || '';
+          if (!name) return;
           if (!this.locationsByDept[dept]) this.locationsByDept[dept] = [];
-          this.locationsByDept[dept].push(l.name || l.location || l);
+          if (!this.locationsByDept[dept].includes(name)) {
+            this.locationsByDept[dept].push(name);
+          }
+          this.locationMeta[dept + '|' + name] = {
+            printerName: l.printerName || l.printer_name || '',
+          };
         });
       }
 
-      // Fallback common departments if API empty
       if (!Object.keys(this.locationsByDept).length) {
         this.locationsByDept = {
           'Human Resources': ['HR Office', 'HR Meeting Room'],
@@ -46,7 +48,6 @@ const Release = {
             .join('');
       }
     } catch {
-      // Use fallback
       this.locationsByDept = {
         'Human Resources': ['HR Office'],
         Finance: ['Finance Office'],
@@ -73,20 +74,40 @@ const Release = {
     locSel.innerHTML =
       '<option value="">Select location…</option>' +
       locs.map((l) => `<option value="${Utils.escapeHtml(l)}">${Utils.escapeHtml(l)}</option>`).join('');
-    if (locs.length === 1) locSel.value = locs[0];
+    const printer = document.getElementById('rel-printer');
+    if (printer) printer.value = '';
+  },
+
+  onLocationChange() {
+    const dept = document.getElementById('rel-dept')?.value || '';
+    const loc = document.getElementById('rel-location')?.value || '';
+    const meta = this.locationMeta[dept + '|' + loc];
+    const printer = document.getElementById('rel-printer');
+    if (printer && meta && meta.printerName) {
+      printer.value = meta.printerName;
+    }
   },
 
   onItemChange() {
-    const code = document.getElementById('rel-item')?.value || '';
+    const code = (document.getElementById('rel-item')?.value || '').trim().toUpperCase();
     const hint = document.getElementById('rel-stock-hint');
     if (!hint) return;
-    const item = Inventory.items.find((i) => (i.itemCode || i.inkCode) === code);
-    if (item) {
-      hint.textContent = `On hand: ${item.quantity}`;
-      hint.className = item.quantity < 1 ? 'text-xs text-rose-600 mt-1' : 'text-xs text-slate-400 mt-1';
-    } else {
+    if (!code || !window.Inventory || !Inventory.items) {
       hint.textContent = '';
+      return;
     }
+    const item = Inventory.items.find(
+      (i) => (i.inkCode || i.itemCode || '').toUpperCase() === code
+    );
+    if (!item) {
+      hint.textContent = '';
+      return;
+    }
+    const qty = Number(item.quantity) || 0;
+    const st = Utils.stockStatus(qty, item.reorderLevel);
+    hint.innerHTML =
+      `Current stock: <strong>${qty}</strong> ` +
+      (st === 'out' ? '<span class="text-rose-600">(out of stock)</span>' : st === 'low' ? '<span class="text-amber-600">(low)</span>' : '');
   },
 
   showMsg(text, ok) {
@@ -103,6 +124,9 @@ const Release = {
     const department = (document.getElementById('rel-dept')?.value || '').trim();
     const location = (document.getElementById('rel-location')?.value || '').trim();
     const issuedBy = (document.getElementById('rel-issued-by')?.value || '').trim();
+    const locationPrinter = (document.getElementById('rel-printer')?.value || '').trim();
+    const yieldRaw = document.getElementById('rel-yield')?.value;
+    const actualYield = yieldRaw !== '' && yieldRaw != null ? parseInt(yieldRaw, 10) : null;
 
     if (!ref) {
       this.showMsg('Reference number is required.', false);
@@ -125,17 +149,26 @@ const Release = {
     if (btn) btn.disabled = true;
 
     try {
-      const res = await API.release({
+      const payload = {
         referenceNumber: ref,
         inkCode,
         itemCode: inkCode,
         department,
         location,
         issuedBy,
-      });
+        locationPrinter,
+        printerName: locationPrinter,
+      };
+      if (actualYield != null && !Number.isNaN(actualYield)) {
+        payload.actualYield = actualYield;
+        payload.yield = actualYield;
+      }
+      const res = await API.release(payload);
       this.showMsg(res.message || 'Issuance recorded.', true);
       Notifications.toast('Issuance recorded: ' + ref, 'success');
       document.getElementById('rel-ref').value = '';
+      const y = document.getElementById('rel-yield');
+      if (y) y.value = '';
       await Inventory.load();
       Dashboard.load();
       setTimeout(() => Modals.close('modal-release'), 600);
@@ -154,7 +187,15 @@ const Release = {
     if (msg) msg.classList.add('hidden');
     Inventory.populateSelects?.();
     this.onItemChange();
-    if (window.Modals) { Modals.open('modal-release'); } else { const el = document.getElementById('modal-release'); if (el) { el.classList.add('open'); el.style.display = 'flex'; } }
+    if (window.Modals) {
+      Modals.open('modal-release');
+    } else {
+      const el = document.getElementById('modal-release');
+      if (el) {
+        el.classList.add('open');
+        el.style.display = 'flex';
+      }
+    }
     document.getElementById('rel-ref')?.focus();
   },
 
@@ -164,6 +205,7 @@ const Release = {
 
     document.getElementById('btn-open-release')?.addEventListener('click', () => this.open());
     document.getElementById('rel-dept')?.addEventListener('change', () => this.onDeptChange());
+    document.getElementById('rel-location')?.addEventListener('change', () => this.onLocationChange());
     document.getElementById('rel-item')?.addEventListener('change', () => this.onItemChange());
     document.getElementById('btn-record-release')?.addEventListener('click', () => this.submit());
     this.loadLocations();
