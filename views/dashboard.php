@@ -12,6 +12,37 @@
     </div>
   </div>
 
+
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+    <button type="button" id="btn-open-delivery" class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-left shadow-soft hover:border-slate-300 hover:bg-slate-50 transition-colors">
+      <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
+      </span>
+      <span>
+        <span class="block text-sm font-semibold text-slate-900">Receive Delivery</span>
+        <span class="block text-xs text-slate-500">Increase stock from a delivery</span>
+      </span>
+    </button>
+    <button type="button" id="btn-open-release" class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-left shadow-soft hover:border-slate-300 hover:bg-slate-50 transition-colors">
+      <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+      </span>
+      <span>
+        <span class="block text-sm font-semibold text-slate-900">Stock Issuance</span>
+        <span class="block text-xs text-slate-500">Release 1 unit to a department</span>
+      </span>
+    </button>
+    <button type="button" id="btn-open-defective" class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-left shadow-soft hover:border-slate-300 hover:bg-slate-50 transition-colors">
+      <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-rose-50 text-rose-700">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+      </span>
+      <span>
+        <span class="block text-sm font-semibold text-slate-900">Return Defective</span>
+        <span class="block text-xs text-slate-500">Flag issued ticket (no stock restore)</span>
+      </span>
+    </button>
+  </div>
+
   <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
     <div class="kpi-card">
       <div class="text-xs font-medium text-slate-500 mb-1">Total SKUs</div>

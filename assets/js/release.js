@@ -138,6 +138,7 @@ const Release = {
       document.getElementById('rel-ref').value = '';
       await Inventory.load();
       Dashboard.load();
+      setTimeout(() => Modals.close('modal-release'), 600);
     } catch (err) {
       this.showMsg(err.message, false);
       Notifications.toast(err.message, 'error');
@@ -146,10 +147,22 @@ const Release = {
     }
   },
 
+  open() {
+    const dateEl = document.getElementById('rel-date');
+    if (dateEl) dateEl.value = Utils.today();
+    const msg = document.getElementById('rel-msg');
+    if (msg) msg.classList.add('hidden');
+    Inventory.populateSelects?.();
+    this.onItemChange();
+    if (window.Modals) { Modals.open('modal-release'); } else { const el = document.getElementById('modal-release'); if (el) { el.classList.add('open'); el.style.display = 'flex'; } }
+    document.getElementById('rel-ref')?.focus();
+  },
+
   init() {
     const dateEl = document.getElementById('rel-date');
     if (dateEl) dateEl.value = Utils.today();
 
+    document.getElementById('btn-open-release')?.addEventListener('click', () => this.open());
     document.getElementById('rel-dept')?.addEventListener('change', () => this.onDeptChange());
     document.getElementById('rel-item')?.addEventListener('change', () => this.onItemChange());
     document.getElementById('btn-record-release')?.addEventListener('click', () => this.submit());

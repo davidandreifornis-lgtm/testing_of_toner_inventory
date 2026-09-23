@@ -45,6 +45,30 @@ header('Cache-Control: no-store, no-cache, must-revalidate');
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="<?php echo htmlspecialchars($assetBase); ?>/assets/css/app.css">
+  <style id="modal-critical-css">
+    .modal-backdrop {
+      position: fixed !important;
+      inset: 0 !important;
+      background: rgba(15, 23, 42, 0.45) !important;
+      z-index: 9999 !important;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .modal-backdrop.open { display: flex !important; }
+    .modal-panel {
+      background: #fff;
+      border-radius: 0.875rem;
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.2);
+      max-height: 90vh;
+      overflow: auto;
+      width: 100%;
+      position: relative;
+      z-index: 10000;
+    }
+  </style>
+
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen">
   <div id="app" class="flex min-h-screen">
@@ -54,15 +78,15 @@ header('Cache-Control: no-store, no-cache, must-revalidate');
       <main id="main-content" class="flex-1 p-4 sm:p-6 space-y-6 overflow-x-hidden">
         <?php require __DIR__ . '/views/dashboard.php'; ?>
         <?php require __DIR__ . '/views/inventory.php'; ?>
-        <?php require __DIR__ . '/views/delivery.php'; ?>
-        <?php require __DIR__ . '/views/release.php'; ?>
-        <?php require __DIR__ . '/views/defective.php'; ?>
         <?php require __DIR__ . '/views/transactions.php'; ?>
         <?php require __DIR__ . '/views/settings.php'; ?>
       </main>
     </div>
   </div>
 
+  <?php require __DIR__ . '/components/modals/delivery.php'; ?>
+  <?php require __DIR__ . '/components/modals/release.php'; ?>
+  <?php require __DIR__ . '/components/modals/defective.php'; ?>
   <?php require __DIR__ . '/components/modals/stock-card.php'; ?>
   <?php require __DIR__ . '/components/modals/add-toner.php'; ?>
   <?php require __DIR__ . '/components/modals/confirm.php'; ?>

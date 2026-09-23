@@ -6,9 +6,6 @@ const App = {
   titles: {
     dashboard: 'Dashboard',
     inventory: 'Toner Inventory',
-    delivery: 'Receive Delivery',
-    release: 'Stock Issuance',
-    defective: 'Return Defective',
     transactions: 'Transaction History',
     settings: 'Email Settings',
   },

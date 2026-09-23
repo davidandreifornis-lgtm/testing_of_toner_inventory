@@ -2,10 +2,21 @@
  * Receive delivery — stock increases, duplicate ref blocked.
  */
 const Delivery = {
+  open() {
+    const dateEl = document.getElementById('del-date');
+    if (dateEl) dateEl.value = Utils.today();
+    const msg = document.getElementById('del-msg');
+    if (msg) msg.classList.add('hidden');
+    Inventory.populateSelects?.();
+    if (window.Modals) { Modals.open('modal-delivery'); } else { const el = document.getElementById('modal-delivery'); if (el) { el.classList.add('open'); el.style.display = 'flex'; } }
+    document.getElementById('del-ref')?.focus();
+  },
+
   init() {
     const dateEl = document.getElementById('del-date');
     if (dateEl) dateEl.value = Utils.today();
 
+    document.getElementById('btn-open-delivery')?.addEventListener('click', () => this.open());
     document.getElementById('btn-record-delivery')?.addEventListener('click', () => this.submit());
   },
 
@@ -55,6 +66,7 @@ const Delivery = {
       document.getElementById('del-qty').value = '1';
       await Inventory.load();
       Dashboard.load();
+      setTimeout(() => Modals.close('modal-delivery'), 600);
     } catch (err) {
       this.showMsg(err.message, false);
       Notifications.toast(err.message, 'error');

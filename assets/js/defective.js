@@ -33,6 +33,7 @@ const Defective = {
       document.getElementById('def-ref').value = '';
       document.getElementById('def-notes').value = '';
       Dashboard.load();
+      setTimeout(() => Modals.close('modal-defective'), 600);
     } catch (err) {
       this.showMsg(err.message, false);
       Notifications.toast(err.message, 'error');
@@ -41,7 +42,15 @@ const Defective = {
     }
   },
 
+  open() {
+    const msg = document.getElementById('def-msg');
+    if (msg) msg.classList.add('hidden');
+    if (window.Modals) { Modals.open('modal-defective'); } else { const el = document.getElementById('modal-defective'); if (el) { el.classList.add('open'); el.style.display = 'flex'; } }
+    document.getElementById('def-ref')?.focus();
+  },
+
   init() {
+    document.getElementById('btn-open-defective')?.addEventListener('click', () => this.open());
     document.getElementById('btn-flag-defective')?.addEventListener('click', () => this.submit());
   },
 };
