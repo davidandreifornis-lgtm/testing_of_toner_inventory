@@ -147,8 +147,6 @@ const Logs = {
   init() {
     document.getElementById('btn-open-mail-log')?.addEventListener('click', () => this.openMailLog());
     document.getElementById('btn-open-system-logs')?.addEventListener('click', () => this.openSystemLogs());
-    document.getElementById('btn-refresh-mail-log')?.addEventListener('click', () => this.loadMailLog());
-    document.getElementById('btn-refresh-system-logs')?.addEventListener('click', () => this.loadSystemLogs());
     document.getElementById('syslog-period')?.addEventListener('change', () => this.loadSystemLogs());
     document.getElementById('syslog-action')?.addEventListener('change', () => this.loadSystemLogs());
     document.getElementById('syslog-search')?.addEventListener(

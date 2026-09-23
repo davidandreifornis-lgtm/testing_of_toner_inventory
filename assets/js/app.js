@@ -1,17 +1,40 @@
 /**
  * Application bootstrap — navigation, init modules, load data from API only.
- * No localStorage demo mode. Empty states when DB has no data.
+ * Current view is kept in the URL hash (+ sessionStorage) so reload stays on the same page.
  */
 const App = {
   titles: {
     dashboard: 'Dashboard',
     inventory: 'Toner Inventory',
     transactions: 'Transaction History',
-    masters: 'Masters',
+    masters: 'Suppliers and Locations',
     settings: 'Settings',
   },
 
-  showView(name) {
+  storageKey: 'toner_active_view',
+
+  resolveView() {
+    const fromHash = (location.hash || '').replace(/^#/, '').trim();
+    if (fromHash && this.titles[fromHash]) return fromHash;
+    try {
+      const stored = sessionStorage.getItem(this.storageKey);
+      if (stored && this.titles[stored]) return stored;
+    } catch (_) { /* ignore */ }
+    return 'dashboard';
+  },
+
+  persistView(name) {
+    try {
+      sessionStorage.setItem(this.storageKey, name);
+    } catch (_) { /* ignore */ }
+    if (location.hash.replace(/^#/, '') !== name) {
+      history.replaceState(null, '', '#' + name);
+    }
+  },
+
+  showView(name, opts = {}) {
+    if (!this.titles[name]) name = 'dashboard';
+
     document.querySelectorAll('.page-view').forEach((el) => el.classList.remove('active'));
     const view = document.getElementById('view-' + name);
     if (view) view.classList.add('active');
@@ -27,11 +50,16 @@ const App = {
     document.getElementById('sidebar')?.classList.remove('open');
     document.getElementById('sidebar-overlay')?.classList.remove('open');
 
-    if (name === 'transactions') Transactions.load();
-    if (name === 'dashboard') Dashboard.load();
-    if (name === 'inventory') Inventory.load();
-    if (name === 'settings') Settings.load();
-    if (name === 'masters') Masters.load();
+    this.persistView(name);
+
+    // Load data for the active view only (avoid forcing dashboard after every nav)
+    if (!opts.skipLoad) {
+      if (name === 'transactions') Transactions.load();
+      if (name === 'dashboard') Dashboard.load();
+      if (name === 'inventory') Inventory.load();
+      if (name === 'settings') Settings.load();
+      if (name === 'masters') Masters.load();
+    }
   },
 
   initNav() {
@@ -39,13 +67,18 @@ const App = {
       a.addEventListener('click', (e) => {
         e.preventDefault();
         const view = a.getAttribute('data-view');
-        history.replaceState(null, '', '#' + view);
         this.showView(view);
       });
     });
 
-    const hash = (location.hash || '#dashboard').replace('#', '');
-    this.showView(this.titles[hash] ? hash : 'dashboard');
+    // Browser back/forward or manual hash change
+    window.addEventListener('hashchange', () => {
+      const name = this.resolveView();
+      this.showView(name);
+    });
+
+    // Restore last view (hash first, then sessionStorage)
+    this.showView(this.resolveView());
 
     document.getElementById('btn-sidebar-toggle')?.addEventListener('click', () => {
       document.getElementById('sidebar')?.classList.toggle('open');
@@ -54,6 +87,16 @@ const App = {
     document.getElementById('sidebar-overlay')?.addEventListener('click', () => {
       document.getElementById('sidebar')?.classList.remove('open');
       document.getElementById('sidebar-overlay')?.classList.remove('open');
+    });
+
+    document.getElementById('btn-logout')?.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const ok = await Modals.confirm('Log out of Toner Inventory?', {
+        title: 'Confirm log out',
+        okLabel: 'Log out',
+        danger: true,
+      });
+      if (ok) window.location.href = 'logout.php';
     });
   },
 
@@ -71,15 +114,12 @@ const App = {
     Masters.init();
     this.initNav();
 
-    // Initial data load from database only
+    // Health check only — view data is loaded by showView above
     try {
       await API.health();
     } catch (err) {
       Notifications.toast('API health check failed: ' + (err.message || 'unavailable'), 'error');
     }
-
-    await Inventory.load();
-    await Dashboard.load();
   },
 };
 

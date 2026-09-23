@@ -10,8 +10,7 @@
       </button>
     </div>
     <div class="px-5 py-3 border-b border-slate-100 flex flex-wrap items-center gap-2">
-      <button type="button" id="btn-refresh-mail-log" class="btn btn-secondary btn-sm">Refresh</button>
-      <span id="mail-log-count" class="text-xs text-slate-400"></span>
+<span id="mail-log-count" class="text-xs text-slate-400"></span>
     </div>
     <div class="p-4 max-h-[28rem] overflow-y-auto">
       <div id="mail-log-list" class="space-y-3">

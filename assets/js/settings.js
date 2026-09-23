@@ -118,6 +118,12 @@ const Settings = {
       this.showMsg('settings-msg', 'SMTP username is required.', false);
       return;
     }
+    const confirmed = await Modals.confirm(
+      'Save email / SMTP settings?',
+      { title: 'Confirm save settings', okLabel: 'Save' }
+    );
+    if (!confirmed) return;
+
     const btn = document.getElementById('btn-save-email');
     if (btn) btn.disabled = true;
     try {
@@ -134,6 +140,11 @@ const Settings = {
   },
 
   async testLowStock() {
+    const confirmed = await Modals.confirm(
+      'Run low-stock check now? This may send alert emails.',
+      { title: 'Confirm low-stock check', okLabel: 'Run check' }
+    );
+    if (!confirmed) return;
     const btn = document.getElementById('btn-test-low-stock');
     if (btn) btn.disabled = true;
     try {
@@ -231,6 +242,11 @@ const Settings = {
       this.showMsg('users-msg', 'Password must be at least 6 characters.', false);
       return;
     }
+    const confirmed = await Modals.confirm(
+      `Create user "${username}" with role ${role}?`,
+      { title: 'Confirm add user', okLabel: 'Add user' }
+    );
+    if (!confirmed) return;
     const btn = document.getElementById('btn-add-user');
     if (btn) btn.disabled = true;
     try {
@@ -283,6 +299,11 @@ const Settings = {
       this.showMsg('edit-user-msg', 'Password must be at least 6 characters.', false);
       return;
     }
+    const confirmed = await Modals.confirm(
+      'Save changes to this user?',
+      { title: 'Confirm update user', okLabel: 'Save' }
+    );
+    if (!confirmed) return;
     const btn = document.getElementById('btn-save-edit-user');
     if (btn) btn.disabled = true;
     try {
@@ -301,7 +322,9 @@ const Settings = {
   },
 
   async deactivate(id) {
-    if (!id || !confirm('Deactivate this user? They will no longer be able to sign in.')) return;
+    if (!id) return;
+    const ok = await Modals.confirm('Deactivate this user? They will no longer be able to sign in.', { title: 'Deactivate user', okLabel: 'Deactivate', danger: true });
+    if (!ok) return;
     try {
       await API.del('/users.php', { id });
       this.showMsg('users-msg', 'User deactivated.', true);
@@ -334,6 +357,11 @@ const Settings = {
       this.showMsg('self-pass-msg', 'New password and confirmation do not match.', false);
       return;
     }
+    const confirmed = await Modals.confirm(
+      'Change your password?',
+      { title: 'Confirm password change', okLabel: 'Update password', danger: true }
+    );
+    if (!confirmed) return;
     const btn = document.getElementById('btn-change-my-password');
     if (btn) btn.disabled = true;
     try {
@@ -382,7 +410,6 @@ const Settings = {
     });
 
     document.getElementById('btn-add-user')?.addEventListener('click', () => this.addUser());
-    document.getElementById('btn-refresh-users')?.addEventListener('click', () => this.loadUsers());
     document.getElementById('btn-save-edit-user')?.addEventListener('click', () => this.saveEdit());
     document.getElementById('btn-change-my-password')?.addEventListener('click', () => this.changeMyPassword());
   },

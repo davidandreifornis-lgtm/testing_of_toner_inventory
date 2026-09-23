@@ -86,7 +86,7 @@ const Inventory = {
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
         const code = btn.getAttribute('data-code');
-        const ok = await Modals.confirm(`Remove toner ${code} from inventory? Past transactions are kept.`, 'Remove toner');
+        const ok = await Modals.confirm(`Remove toner ${code} from inventory? Past transactions are kept.`, { title: 'Remove toner', okLabel: 'Remove', danger: true });
         if (!ok) return;
         try {
           await API.removeInventory(code);
@@ -203,6 +203,11 @@ const Inventory = {
         Notifications.toast('Item code and description are required.', 'error');
         return;
       }
+      const ok = await Modals.confirm(
+        `Add toner ${payload.itemCode} to inventory?`,
+        { title: 'Confirm add toner', okLabel: 'Add toner' }
+      );
+      if (!ok) return;
       try {
         await API.addInventory(payload);
         Notifications.toast('Toner added', 'success');

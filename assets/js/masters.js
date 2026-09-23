@@ -45,6 +45,8 @@ const Masters = {
       this.showMsg('suppliers-msg', 'Supplier name is required.', false);
       return;
     }
+    const ok = await Modals.confirm(`Add supplier "${name}"?`, { title: 'Confirm add supplier', okLabel: 'Add' });
+    if (!ok) return;
     try {
       await API.post('/suppliers.php', { name });
       if (input) input.value = '';
@@ -59,7 +61,9 @@ const Masters = {
   },
 
   async removeSupplier(id) {
-    if (!id || !confirm('Remove this supplier?')) return;
+    if (!id) return;
+    const ok = await Modals.confirm('Remove this supplier? It will be deactivated.', { title: 'Remove supplier', okLabel: 'Remove', danger: true });
+    if (!ok) return;
     try {
       await API.del('/suppliers.php', { id });
       this.showMsg('suppliers-msg', 'Supplier removed.', true);
@@ -108,6 +112,11 @@ const Masters = {
       this.showMsg('locations-msg', 'Department and location are required.', false);
       return;
     }
+    const ok = await Modals.confirm(
+      `Add location ${department} / ${location}?`,
+      { title: 'Confirm add location', okLabel: 'Add' }
+    );
+    if (!ok) return;
     try {
       await API.post('/locations.php', { department, location, printerName });
       document.getElementById('loc-dept').value = '';
@@ -124,7 +133,9 @@ const Masters = {
   },
 
   async removeLocation(id) {
-    if (!id || !confirm('Remove this location?')) return;
+    if (!id) return;
+    const ok = await Modals.confirm('Remove this location? It will be deactivated.', { title: 'Remove location', okLabel: 'Remove', danger: true });
+    if (!ok) return;
     try {
       await API.del('/locations.php', { id });
       this.showMsg('locations-msg', 'Location removed.', true);
@@ -142,9 +153,7 @@ const Masters = {
 
   init() {
     document.getElementById('btn-add-supplier')?.addEventListener('click', () => this.addSupplier());
-    document.getElementById('btn-refresh-suppliers')?.addEventListener('click', () => this.loadSuppliers());
     document.getElementById('btn-add-location')?.addEventListener('click', () => this.addLocation());
-    document.getElementById('btn-refresh-locations')?.addEventListener('click', () => this.loadLocations());
     document.getElementById('supplier-name')?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();

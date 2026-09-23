@@ -89,8 +89,7 @@
       <div class="bg-white rounded-lg border border-slate-200 p-3 space-y-2">
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-1.5">
           <h2 class="text-sm font-semibold text-slate-900">User management</h2>
-          <button type="button" id="btn-refresh-users" class="btn btn-secondary btn-sm">Refresh</button>
-        </div>
+</div>
 
         <p class="text-[11px] text-slate-500">Admins can create accounts and set roles. DB users are used when <code class="font-mono">dbo.toner_users</code> exists.</p>
 

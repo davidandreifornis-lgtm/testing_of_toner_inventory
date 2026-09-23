@@ -20,8 +20,7 @@
       <select id="syslog-action" class="form-input w-auto max-w-[10rem]">
         <option value="">All actions</option>
       </select>
-      <button type="button" id="btn-refresh-system-logs" class="btn btn-secondary btn-sm">Refresh</button>
-      <span id="syslog-count" class="text-xs text-slate-400"></span>
+<span id="syslog-count" class="text-xs text-slate-400"></span>
     </div>
     <div class="p-0 max-h-[28rem] overflow-y-auto">
       <table class="data-table text-sm">

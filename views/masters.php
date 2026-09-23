@@ -1,13 +1,12 @@
 <section id="view-masters" class="page-view space-y-3">
-  <p class="text-xs text-slate-500">Manage supplier list and department / location / printer mappings used in deliveries and issuances.</p>
+  <p class="text-xs text-slate-500">Manage suppliers and department / location / printer assigned mappings used in issuances and related flows.</p>
 
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
     <!-- Suppliers -->
     <div class="bg-white rounded-xl border border-slate-200 p-3 space-y-2">
       <div class="flex items-center justify-between border-b border-slate-100 pb-2">
         <h2 class="text-sm font-semibold text-slate-900">Suppliers</h2>
-        <button type="button" id="btn-refresh-suppliers" class="btn btn-secondary btn-sm">Refresh</button>
-      </div>
+</div>
       <div class="flex gap-2">
         <input id="supplier-name" type="text" class="form-input flex-1" placeholder="New supplier name">
         <button type="button" id="btn-add-supplier" class="btn btn-primary">Add</button>
@@ -32,8 +31,7 @@
     <div class="bg-white rounded-xl border border-slate-200 p-3 space-y-2">
       <div class="flex items-center justify-between border-b border-slate-100 pb-2">
         <h2 class="text-sm font-semibold text-slate-900">Locations</h2>
-        <button type="button" id="btn-refresh-locations" class="btn btn-secondary btn-sm">Refresh</button>
-      </div>
+</div>
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
         <input id="loc-dept" type="text" class="form-input" placeholder="Department">
         <input id="loc-name" type="text" class="form-input" placeholder="Location">

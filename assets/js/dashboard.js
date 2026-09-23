@@ -378,7 +378,6 @@ const Dashboard = {
 
   init() {
     document.getElementById('dash-period')?.addEventListener('change', () => this.render());
-    document.getElementById('btn-refresh-dashboard')?.addEventListener('click', () => this.load());
 
     document.querySelectorAll('.kpi-clickable[data-kpi]').forEach((btn) => {
       btn.addEventListener('click', () => {

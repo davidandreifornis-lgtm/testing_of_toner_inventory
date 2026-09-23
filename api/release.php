@@ -1,6 +1,6 @@
 <?php
 /**
- * Stock Issuance — deduct 1 unit, log RELEASED with yield + issuer + location printer.
+ * Stock Issuance — deduct 1 unit, log RELEASED with yield + issuer + printer assigned.
  */
 require_once __DIR__ . '/../config/bootstrap.php';
 require_once __DIR__ . '/../config/activity_log.php';

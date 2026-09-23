@@ -8,8 +8,7 @@
         <option value="month" selected>This month</option>
         <option value="all">All time</option>
       </select>
-      <button id="btn-refresh-dashboard" type="button" class="btn btn-secondary btn-sm">Refresh</button>
-      <button id="btn-open-mail-log" type="button" class="btn btn-secondary btn-sm">Mail log</button>
+<button id="btn-open-mail-log" type="button" class="btn btn-secondary btn-sm">Mail log</button>
       <button id="btn-open-system-logs" type="button" class="btn btn-secondary btn-sm">System logs</button>
     </div>
   </div>
