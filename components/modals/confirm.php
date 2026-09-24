@@ -1,4 +1,4 @@
-<div id="modal-confirm" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+<div id="modal-confirm" class="modal-backdrop modal-backdrop-confirm" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
   <div class="modal-panel max-w-sm">
     <div class="p-4">
       <h2 id="confirm-title" class="text-sm font-semibold text-slate-900 mb-1.5">Confirm</h2>

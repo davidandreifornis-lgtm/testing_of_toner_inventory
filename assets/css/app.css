@@ -197,6 +197,23 @@ body {
   margin: 0;
 }
 .modal-backdrop.open { display: flex !important; }
+/* Edit / nested dialogs must sit above the parent stock-card modal */
+.modal-backdrop.modal-backdrop-front {
+  z-index: 10050 !important;
+}
+.modal-backdrop.modal-backdrop-front .modal-panel {
+  z-index: 10051;
+}
+/* Confirmation dialogs must sit above every other modal (stock card, edit, etc.) */
+.modal-backdrop.modal-backdrop-confirm,
+#modal-confirm.modal-backdrop {
+  z-index: 11000 !important;
+}
+.modal-backdrop.modal-backdrop-confirm .modal-panel,
+#modal-confirm.modal-backdrop .modal-panel {
+  z-index: 11001;
+}
+
 .modal-panel {
   background: #fff;
   border-radius: 0.625rem;

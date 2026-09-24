@@ -86,6 +86,9 @@ const API = {
   removeInventory(itemCode) {
     return this.del('/inventory.php', { itemCode, inkCode: itemCode });
   },
+  updateInventory(payload) {
+    return this.put('/inventory.php', payload);
+  },
   transactions(params) {
     return this.get('/transactions.php', params);
   },

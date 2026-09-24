@@ -10,13 +10,20 @@ const Modals = {
       console.error('[Modals] Element not found:', id);
       return false;
     }
-    if (el.parentElement !== document.body) {
-      document.body.appendChild(el);
-    }
+    // Always append last so nested/front modals stack above earlier ones
+    document.body.appendChild(el);
     el.classList.add('open');
     el.classList.remove('hidden');
     el.style.display = 'flex';
     el.setAttribute('aria-hidden', 'false');
+    // Stacking: confirm > edit/front > normal
+    if (el.id === 'modal-confirm' || el.classList.contains('modal-backdrop-confirm')) {
+      el.style.zIndex = '11000';
+    } else if (el.classList.contains('modal-backdrop-front')) {
+      el.style.zIndex = '10050';
+    } else {
+      el.style.zIndex = '';
+    }
     document.body.style.overflow = 'hidden';
     return true;
   },
@@ -86,6 +93,12 @@ const Modals = {
       }
       this._confirmResolver = resolve;
 
+      const confirmEl = document.getElementById('modal-confirm');
+      if (confirmEl) {
+        confirmEl.classList.add('modal-backdrop-confirm');
+        document.body.appendChild(confirmEl);
+        confirmEl.style.zIndex = '11000';
+      }
       this.open('modal-confirm');
 
       const cleanup = (result) => {

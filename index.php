@@ -57,6 +57,13 @@ header('Cache-Control: no-store, no-cache, must-revalidate');
       padding: 0.5rem;
     }
     .modal-backdrop.open { display: flex !important; }
+    .modal-backdrop.modal-backdrop-front { z-index: 10050 !important; }
+    .modal-backdrop.modal-backdrop-front .modal-panel { z-index: 10051; }
+    .modal-backdrop.modal-backdrop-confirm,
+    #modal-confirm.modal-backdrop { z-index: 11000 !important; }
+    .modal-backdrop.modal-backdrop-confirm .modal-panel,
+    #modal-confirm.modal-backdrop .modal-panel { z-index: 11001; }
+
     .modal-panel {
       background: #fff;
       border-radius: 0.5rem;
