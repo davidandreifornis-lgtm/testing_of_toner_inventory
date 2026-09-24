@@ -15,7 +15,7 @@
         <input id="rel-ref" type="text" class="form-input font-mono uppercase" placeholder="Issuance reference" autocomplete="off">
       </div>
       <div>
-        <label class="form-label" for="rel-item">Toner / Item code</label>
+        <label class="form-label" for="rel-item">Toner</label>
         <select id="rel-item" class="form-input">
           <option value="">Select toner…</option>
         </select>
@@ -30,17 +30,17 @@
         </div>
         <div>
           <label class="form-label" for="rel-location">Location</label>
-          <select id="rel-location" class="form-input">
-            <option value="">Select location…</option>
+          <select id="rel-location" class="form-input" disabled>
+            <option value="">Select department first…</option>
           </select>
+          <p id="rel-location-hint" class="text-[11px] text-slate-400 mt-0.5">Select a department first</p>
         </div>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label class="form-label" for="rel-printer">Printer assigned</label>
-          <select id="rel-printer" class="form-input">
-            <option value="">Select printer…</option>
-          </select>
+          <input id="rel-printer" type="text" class="form-input bg-slate-50 text-slate-700" readonly tabindex="-1" placeholder="Auto from master list">
+          <p class="text-[11px] text-slate-400 mt-0.5">From master list — not editable</p>
         </div>
         <div>
           <label class="form-label" for="rel-issued-by">Issued by</label>
@@ -56,9 +56,9 @@
       <div class="rounded-md border border-slate-100 bg-slate-50 px-3 py-2 space-y-2">
         <label class="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
           <input id="rel-yield-enable" type="checkbox" class="rounded border-slate-300">
-          <span>Record actual yield</span>
+          <span>Has actual yield?</span>
         </label>
-        <p class="text-[11px] text-slate-500">Only for printers that report yield. Leave unchecked if not applicable.</p>
+        <p class="text-[11px] text-slate-500">Optional. Only for printers that report yield.</p>
         <div id="rel-yield-wrap" class="hidden">
           <label class="form-label" for="rel-yield">Actual yield</label>
           <input id="rel-yield" type="number" min="0" step="1" class="form-input" placeholder="Yield value">

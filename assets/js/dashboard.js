@@ -5,17 +5,26 @@
 const Dashboard = {
   inventory: [],
   transactions: [],
+  departments: [],
   detailRows: [],
   detailKind: null,
 
   async load() {
     try {
-      const [invRes, txnRes] = await Promise.all([
+      const [invRes, txnRes, locRes] = await Promise.all([
         API.inventory(),
         API.transactions({}),
+        API.locations().catch(() => ({ locations: [] })),
       ]);
       this.inventory = invRes.items || [];
       this.transactions = txnRes.transactions || [];
+      // Unique departments from location masters (always shown on demand chart)
+      const depts = new Set();
+      (locRes.locations || locRes.items || []).forEach((l) => {
+        const d = String(l.department || l.dept || '').trim().toUpperCase();
+        if (d) depts.add(d);
+      });
+      this.departments = [...depts].sort();
       this.render();
     } catch (err) {
       Notifications.toast(err.message || 'Failed to load dashboard', 'error');
@@ -67,20 +76,33 @@ const Dashboard = {
     let delUnits = 0;
     let relCount = 0;
     let relUnits = 0;
+    // Seed every known department with 0 so the chart always lists them
     const deptMap = {};
+    (this.departments || []).forEach((d) => {
+      deptMap[d] = 0;
+    });
     const ticketRefs = new Set();
 
     this.transactions.filter((t) => this.inPeriod(t)).forEach((t) => {
       const ref = (t.referenceNumber || '').trim();
-      if (ref) ticketRefs.add(ref.toUpperCase());
+      const refUp = ref.toUpperCase();
+      if (ref) ticketRefs.add(refUp);
+
+      // Stock-card adjustments (ADJ-…) are not real deliveries/releases for KPIs/charts
+      const isAdjustment = refUp.startsWith('ADJ-')
+        || /stock card adjustment/i.test(String(t.purpose || ''));
 
       if (t.type === 'RECEIVED') {
+        if (isAdjustment) return;
         delCount++;
         delUnits += Number(t.quantity) || 0;
       } else if (t.type === 'RELEASED') {
+        if (isAdjustment) return;
         relCount++;
         relUnits += Number(t.quantity) || 0;
-        const d = (t.department || 'Unknown').trim() || 'Unknown';
+        // Only real issuances with a department count toward demand (skip empty → no "Unknown")
+        const d = String(t.department || '').trim().toUpperCase();
+        if (!d) return;
         deptMap[d] = (deptMap[d] || 0) + (Number(t.quantity) || 1);
       }
     });
@@ -100,7 +122,10 @@ const Dashboard = {
     set('kpi-releases-units', relUnits ? `${relUnits} units · click` : 'Click for details');
     set('kpi-tickets-sub', this.periodLabel() + ' · click');
 
-    const deptEntries = Object.entries(deptMap).sort((a, b) => b[1] - a[1]).slice(0, 8);
+    // Show all departments (masters), sorted by demand desc then name; no "Unknown"
+    const deptEntries = Object.entries(deptMap)
+      .filter(([name]) => name && name.toLowerCase() !== 'unknown')
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
     Charts.renderDept(
       deptEntries.map((e) => e[0]),
       deptEntries.map((e) => e[1])

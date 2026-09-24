@@ -108,6 +108,8 @@ body {
 .badge-low { background: #fef3c7; color: #92400e; }
 .badge-out { background: #fee2e2; color: #991b1b; }
 .badge-defective { background: #fce7f3; color: #9d174d; }
+.badge-sent { background: #e0e7ff; color: #3730a3; }
+.badge-replaced { background: #dcfce7; color: #166534; }
 
 .table-wrap {
   background: #fff;

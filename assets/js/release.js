@@ -1,75 +1,140 @@
 /**
- * Stock issuance — 1 unit, date = today.
- * Department / location / printer assigned / issued by come from the database.
+ * Stock Issuance modal — matches UI spec (Release / Give Toner).
+ * - Department filters locations from master list
+ * - 1 location → auto-selected + disabled (view-only)
+ * - 2+ locations → selectable
+ * - Printer always auto-filled from master, read-only
  */
 const Release = {
   locationsByDept: {},
   locationMeta: {},
-  printers: [],
   users: [],
 
+  esc(s) {
+    if (window.Utils && typeof Utils.escapeHtml === 'function') {
+      return Utils.escapeHtml(String(s));
+    }
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  },
+
   async loadLocations() {
-    const deptSel = document.getElementById('rel-dept');
-    const locSel = document.getElementById('rel-location');
     this.locationsByDept = {};
     this.locationMeta = {};
-    this.printers = [];
 
     try {
       const res = await API.locations();
-      const locs = res.locations || res.data?.locations || [];
-      const printerSet = new Set();
-
-      if (Array.isArray(locs)) {
-        locs.forEach((l) => {
-          const dept = String(l.department || l.dept || '').trim();
-          const name = String(l.location || l.name || '').trim();
-          const printer = String(l.printerName || l.printer_name || '').trim();
-          if (!dept || !name) return;
-          if (!this.locationsByDept[dept]) this.locationsByDept[dept] = [];
-          if (!this.locationsByDept[dept].includes(name)) {
-            this.locationsByDept[dept].push(name);
-          }
-          this.locationMeta[dept + '|' + name] = { printerName: printer };
-          if (printer) printerSet.add(printer);
-        });
-      }
-      this.printers = [...printerSet].sort((a, b) => a.localeCompare(b));
+      const rows = res.locations || res.data?.locations || [];
+      (rows || []).forEach((l) => {
+        const dept = String(l.department || l.dept || '').trim().toUpperCase();
+        const name = String(l.location || l.name || '').trim();
+        const printer = String(l.printerName || l.printer_name || '').trim();
+        if (!dept || !name) return;
+        if (!this.locationsByDept[dept]) this.locationsByDept[dept] = [];
+        if (!this.locationsByDept[dept].includes(name)) {
+          this.locationsByDept[dept].push(name);
+        }
+        this.locationMeta[dept + '|' + name] = { printerName: printer };
+      });
     } catch (err) {
-      console.warn('Could not load locations from database:', err.message || err);
+      console.warn('loadLocations failed:', err);
     }
 
+    const deptSel = document.getElementById('rel-dept');
     if (deptSel) {
       const keys = Object.keys(this.locationsByDept).sort();
       if (!keys.length) {
-        deptSel.innerHTML =
-          '<option value="">No departments in database — add under Suppliers and Locations</option>';
+        deptSel.innerHTML = '<option value="">No departments in master list</option>';
       } else {
         deptSel.innerHTML =
           '<option value="">Select department…</option>' +
-          keys
-            .map((d) => `<option value="${Utils.escapeHtml(d)}">${Utils.escapeHtml(d)}</option>`)
-            .join('');
+          keys.map((d) => `<option value="${this.esc(d)}">${this.esc(d)}</option>`).join('');
       }
+      deptSel.value = '';
     }
-    if (locSel) locSel.innerHTML = '<option value="">Select location…</option>';
-    this.fillPrinterSelect();
+
+    this.resetLocationUI();
   },
 
-  fillPrinterSelect(preferred) {
-    const sel = document.getElementById('rel-printer');
-    if (!sel) return;
-    const current = preferred != null ? preferred : sel.value;
-    if (!this.printers.length) {
-      sel.innerHTML = '<option value="">No printers in database — set under Suppliers and Locations</option>';
+  resetLocationUI() {
+    const locSel = document.getElementById('rel-location');
+    const hint = document.getElementById('rel-location-hint');
+    if (locSel) {
+      locSel.innerHTML = '<option value="">Select department first…</option>';
+      locSel.disabled = true;
+      locSel.classList.add('bg-slate-50');
+    }
+    if (hint) hint.textContent = 'Select a department first';
+    this.setPrinter('');
+  },
+
+  setPrinter(name) {
+    const el = document.getElementById('rel-printer');
+    if (el) el.value = name ? String(name).trim() : '';
+  },
+
+  /** Called when department changes — gist: auto-filter / auto-fill location */
+  onDeptChange() {
+    const dept = String(document.getElementById('rel-dept')?.value || '')
+      .trim()
+      .toUpperCase();
+    const locSel = document.getElementById('rel-location');
+    const hint = document.getElementById('rel-location-hint');
+    if (!locSel) return;
+
+    const locs = dept ? this.locationsByDept[dept] || [] : [];
+
+    if (!dept) {
+      this.resetLocationUI();
       return;
     }
-    sel.innerHTML =
-      '<option value="">Select printer…</option>' +
-      this.printers
-        .map((p) => `<option value="${Utils.escapeHtml(p)}">${Utils.escapeHtml(p)}</option>`)
-        .join('');
-    if (current && this.printers.includes(current)) sel.value = current;
+
+    if (locs.length === 0) {
+      locSel.innerHTML = '<option value="">No locations for this department</option>';
+      locSel.disabled = true;
+      locSel.classList.add('bg-slate-50');
+      if (hint) hint.textContent = 'Add locations under Suppliers and Locations.';
+      this.setPrinter('');
+      return;
+    }
+
+    if (locs.length === 1) {
+      // Exactly one → auto-select and lock (view-only)
+      const only = locs[0];
+      locSel.innerHTML = `<option value="${this.esc(only)}">${this.esc(only)}</option>`;
+      locSel.value = only;
+      locSel.disabled = true;
+      locSel.classList.add('bg-slate-50');
+      if (hint) hint.textContent = 'Only location for this department (auto-filled).';
+      this.onLocationChange();
+      return;
+    }
+
+    // 2+ → selectable
+    locSel.innerHTML =
+      '<option value="">Select location…</option>' +
+      locs.map((l) => `<option value="${this.esc(l)}">${this.esc(l)}</option>`).join('');
+    locSel.value = '';
+    locSel.disabled = false;
+    locSel.classList.remove('bg-slate-50');
+    if (hint) hint.textContent = 'Multiple locations — choose one.';
+    this.setPrinter('');
+  },
+
+  onLocationChange() {
+    const dept = String(document.getElementById('rel-dept')?.value || '')
+      .trim()
+      .toUpperCase();
+    const loc = String(document.getElementById('rel-location')?.value || '').trim();
+    if (!dept || !loc) {
+      this.setPrinter('');
+      return;
+    }
+    const meta = this.locationMeta[dept + '|' + loc];
+    this.setPrinter(meta && meta.printerName ? meta.printerName : '');
   },
 
   async loadUsers() {
@@ -80,7 +145,6 @@ const Release = {
       const res = await API.get('/users.php');
       this.users = (res.users || []).filter((u) => u.isActive !== false);
     } catch {
-      // Non-admin may not list users — try self profile
       try {
         const me = await API.get('/users.php', { self: '1' });
         if (me.user) this.users = [me.user];
@@ -88,50 +152,22 @@ const Release = {
         this.users = [];
       }
     }
-
     if (!this.users.length) {
-      sel.innerHTML = '<option value="">No users in database</option>';
+      sel.innerHTML = '<option value="">No users</option>';
       return;
     }
     sel.innerHTML =
       '<option value="">Select user…</option>' +
       this.users
         .map((u) => {
-          const label = u.fullName
-            ? `${u.fullName} (${u.username})`
-            : u.username;
-          return `<option value="${Utils.escapeHtml(u.username)}">${Utils.escapeHtml(label)}</option>`;
+          const label = u.fullName ? `${u.fullName} (${u.username})` : u.username;
+          return `<option value="${this.esc(u.username)}">${this.esc(label)}</option>`;
         })
         .join('');
   },
 
-  onDeptChange() {
-    const dept = document.getElementById('rel-dept')?.value || '';
-    const locSel = document.getElementById('rel-location');
-    if (!locSel) return;
-    const locs = this.locationsByDept[dept] || [];
-    if (!dept) {
-      locSel.innerHTML = '<option value="">Select location…</option>';
-    } else if (!locs.length) {
-      locSel.innerHTML = '<option value="">No locations for this department</option>';
-    } else {
-      locSel.innerHTML =
-        '<option value="">Select location…</option>' +
-        locs.map((l) => `<option value="${Utils.escapeHtml(l)}">${Utils.escapeHtml(l)}</option>`).join('');
-    }
-  },
-
-  onLocationChange() {
-    const dept = document.getElementById('rel-dept')?.value || '';
-    const loc = document.getElementById('rel-location')?.value || '';
-    const meta = this.locationMeta[dept + '|' + loc];
-    if (meta && meta.printerName) {
-      this.fillPrinterSelect(meta.printerName);
-    }
-  },
-
   onYieldToggle() {
-    const on = document.getElementById('rel-yield-enable')?.checked;
+    const on = !!document.getElementById('rel-yield-enable')?.checked;
     const wrap = document.getElementById('rel-yield-wrap');
     if (wrap) wrap.classList.toggle('hidden', !on);
     if (!on) {
@@ -149,14 +185,17 @@ const Release = {
       return;
     }
     const item = Inventory.items.find(
-      (i) => (i.inkCode || i.itemCode || '').toUpperCase() === code
+      (i) => String(i.inkCode || i.itemCode || '').toUpperCase() === code
     );
     if (!item) {
       hint.textContent = '';
       return;
     }
     const qty = Number(item.quantity) || 0;
-    const st = Utils.stockStatus(qty, item.reorderLevel);
+    const st =
+      window.Utils && Utils.stockStatus
+        ? Utils.stockStatus(qty, item.reorderLevel)
+        : 'ok';
     hint.innerHTML =
       `Current stock: <strong>${qty}</strong> ` +
       (st === 'out'
@@ -183,11 +222,13 @@ const Release = {
     const locationPrinter = (document.getElementById('rel-printer')?.value || '').trim();
     const yieldEnabled = !!document.getElementById('rel-yield-enable')?.checked;
     const yieldRaw = document.getElementById('rel-yield')?.value;
-    const actualYield =
-      yieldEnabled && yieldRaw !== '' && yieldRaw != null ? parseInt(yieldRaw, 10) : null;
+    let actualYield = null;
+    if (yieldEnabled && yieldRaw !== '' && yieldRaw != null) {
+      actualYield = Number(yieldRaw);
+    }
 
     if (!ref) {
-      this.showMsg('Reference number is required.', false);
+      this.showMsg('Issuance reference number is required.', false);
       return;
     }
     if (!inkCode) {
@@ -195,27 +236,26 @@ const Release = {
       return;
     }
     if (!department) {
-      this.showMsg('Department is required. Add departments under Suppliers and Locations if the list is empty.', false);
+      this.showMsg('Department is required.', false);
       return;
     }
     if (!location) {
       this.showMsg('Location is required.', false);
       return;
     }
-    if (yieldEnabled && (actualYield == null || Number.isNaN(actualYield))) {
-      this.showMsg('Enter actual yield, or uncheck “Record actual yield”.', false);
-      return;
-    }
 
-    const ok = await Modals.confirm(
-      `Issue 1 × ${inkCode} to ${department} / ${location}? Reference ${ref}. Stock will decrease by 1.`,
-      { title: 'Confirm issuance', okLabel: 'Record issuance' }
-    );
-    if (!ok) return;
+    let confirmed = true;
+    if (window.Modals && typeof Modals.confirm === 'function') {
+      confirmed = await Modals.confirm(
+        'Confirm issuance',
+        `Issue 1 × ${inkCode} to ${department} / ${location}? Reference ${ref}. Stock will decrease by 1.`,
+        { okLabel: 'Record' }
+      );
+    }
+    if (!confirmed) return;
 
     const btn = document.getElementById('btn-record-release');
     if (btn) btn.disabled = true;
-
     try {
       const payload = {
         referenceNumber: ref,
@@ -233,34 +273,49 @@ const Release = {
       }
       const res = await API.release(payload);
       this.showMsg(res.message || 'Issuance recorded.', true);
-      Notifications.toast('Issuance recorded: ' + ref, 'success');
-      document.getElementById('rel-ref').value = '';
+      if (window.Notifications) Notifications.toast('Issuance recorded: ' + ref, 'success');
+      const refEl = document.getElementById('rel-ref');
+      if (refEl) refEl.value = '';
       const ye = document.getElementById('rel-yield-enable');
       if (ye) ye.checked = false;
       this.onYieldToggle();
-      await Inventory.load();
-      Dashboard.load();
-      setTimeout(() => Modals.close('modal-release'), 600);
+      if (window.Inventory) await Inventory.load();
+      if (window.Dashboard) Dashboard.load();
+      setTimeout(() => {
+        if (window.Modals) Modals.close('modal-release');
+      }, 600);
     } catch (err) {
-      this.showMsg(err.message, false);
-      Notifications.toast(err.message, 'error');
+      this.showMsg(err.message || 'Failed', false);
+      if (window.Notifications) Notifications.toast(err.message, 'error');
     } finally {
       if (btn) btn.disabled = false;
     }
   },
 
-  open() {
+  async open() {
     const dateEl = document.getElementById('rel-date');
-    if (dateEl) dateEl.value = Utils.today();
+    if (dateEl && window.Utils) dateEl.value = Utils.today();
     const msg = document.getElementById('rel-msg');
     if (msg) msg.classList.add('hidden');
     const ye = document.getElementById('rel-yield-enable');
     if (ye) ye.checked = false;
     this.onYieldToggle();
-    this.loadLocations();
-    this.loadUsers();
-    Inventory.populateSelects?.();
+
+    await this.loadLocations();
+    await this.loadUsers();
+    // Always load inventory so toner options (description + qty) are available
+    // even when opening from Dashboard without visiting Inventory first
+    try {
+      if (window.Inventory && typeof Inventory.load === 'function') {
+        await Inventory.load();
+      } else if (window.Inventory && Inventory.populateSelects) {
+        Inventory.populateSelects();
+      }
+    } catch (err) {
+      console.warn('Could not load inventory for release modal:', err);
+    }
     this.onItemChange();
+
     if (window.Modals) Modals.open('modal-release');
     else {
       const el = document.getElementById('modal-release');
@@ -274,7 +329,7 @@ const Release = {
 
   init() {
     const dateEl = document.getElementById('rel-date');
-    if (dateEl) dateEl.value = Utils.today();
+    if (dateEl && window.Utils) dateEl.value = Utils.today();
 
     document.getElementById('btn-open-release')?.addEventListener('click', () => this.open());
     document.getElementById('rel-dept')?.addEventListener('change', () => this.onDeptChange());
@@ -282,6 +337,7 @@ const Release = {
     document.getElementById('rel-item')?.addEventListener('change', () => this.onItemChange());
     document.getElementById('rel-yield-enable')?.addEventListener('change', () => this.onYieldToggle());
     document.getElementById('btn-record-release')?.addEventListener('click', () => this.submit());
+
     this.loadLocations();
     this.loadUsers();
   },

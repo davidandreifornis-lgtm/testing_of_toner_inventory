@@ -88,6 +88,8 @@ header('Cache-Control: no-store, no-cache, must-revalidate');
   <?php require __DIR__ . '/components/modals/delivery.php'; ?>
   <?php require __DIR__ . '/components/modals/release.php'; ?>
   <?php require __DIR__ . '/components/modals/defective.php'; ?>
+  <?php require __DIR__ . '/components/modals/txn-detail.php'; ?>
+  <?php require __DIR__ . '/components/modals/def-replace.php'; ?>
   <?php require __DIR__ . '/components/modals/stock-card.php'; ?>
   <?php require __DIR__ . '/components/modals/add-toner.php'; ?>
   <?php require __DIR__ . '/components/modals/confirm.php'; ?>

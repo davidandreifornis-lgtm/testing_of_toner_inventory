@@ -21,6 +21,8 @@
     </div>
   </div>
 
+  <div id="txn-dept-tabs" class="hidden flex flex-wrap gap-1.5"></div>
+
   <div class="table-wrap">
     <div class="overflow-x-auto">
       <table class="data-table" id="txn-table">
@@ -32,10 +34,11 @@
             <th>Qty</th>
             <th>Date</th>
             <th>Details</th>
+            <th class="text-right">Action</th>
           </tr>
         </thead>
         <tbody id="txn-tbody">
-          <tr><td colspan="6" class="text-center text-slate-400 py-8">Loading…</td></tr>
+          <tr><td colspan="7" class="text-center text-slate-400 py-8">Loading…</td></tr>
         </tbody>
       </table>
     </div>

@@ -19,18 +19,44 @@ const Inventory = {
   },
 
   populateSelects() {
-    const opts =
-      '<option value="">Select toner…</option>' +
-      this.items
-        .map(
-          (i) =>
-            `<option value="${Utils.escapeHtml(i.itemCode || i.inkCode)}">${Utils.escapeHtml(i.itemCode || i.inkCode)} — qty ${i.quantity}</option>`
-        )
-        .join('');
+    const optionLabel = (i) => {
+      const code = String(i.itemCode || i.inkCode || '').trim();
+      const desc = String(i.description || '').trim();
+      const qty = Number(i.quantity);
+      const qtyText = Number.isFinite(qty) ? String(qty) : '0';
+      // Description + current qty (value is still item code)
+      if (desc) {
+        return desc + ' — qty ' + qtyText;
+      }
+      return code + ' — qty ' + qtyText;
+    };
+
+    const items = Array.isArray(this.items) ? this.items : [];
+    const esc = (s) =>
+      window.Utils && Utils.escapeHtml ? Utils.escapeHtml(String(s)) : String(s);
+
+    const makeOpts = (placeholder) => {
+      if (!items.length) {
+        return '<option value="">No toners in inventory</option>';
+      }
+      return (
+        '<option value="">' +
+        placeholder +
+        '</option>' +
+        items
+          .map((i) => {
+            const val = esc(i.itemCode || i.inkCode || '');
+            const label = esc(optionLabel(i));
+            return '<option value="' + val + '">' + label + '</option>';
+          })
+          .join('')
+      );
+    };
+
     const del = document.getElementById('del-item');
     const rel = document.getElementById('rel-item');
-    if (del) del.innerHTML = opts;
-    if (rel) rel.innerHTML = opts;
+    if (del) del.innerHTML = makeOpts('Select toner…');
+    if (rel) rel.innerHTML = makeOpts('Select toner…');
   },
 
   filtered() {
